@@ -1,0 +1,10 @@
+{
+  "repository": "NDDev-OpenNetwork/rldyour-updater",
+  "release": "v0.2.1",
+  "linux_asset": "rldyour-updater-v0.2.1-linux-x86_64",
+  "sha256": "5e0468b5c5c2dbbf3855a51738ae507bd06c892456ab3e0c23d125fcf3666c64",
+  "executables": {
+    "NDS_TEST_UPDATER": "rldyour-updater-v0.2.1-linux-x86_64"
+  },
+  "size": 1142616
+}
