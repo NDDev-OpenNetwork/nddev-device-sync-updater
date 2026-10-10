@@ -32,7 +32,18 @@ with tempfile.TemporaryDirectory(prefix="nds-" + OWNER + "-") as temporary:
     policy.write_text('schema = 2\nchannel = "signed-gds"\ncommand_timeout_seconds = 2\n[gds]\nenabled = false\napplications = false\n[apt]\nobserve = true\napply = false\n[native]\nhomebrew = false\nflatpak = false\n')
     # Only observations are enabled. The real native owner creates its own
     # report in this fixture; no invented run receipt or real user report.
-    subprocess.run([str(binary), "--config", str(policy), 'apply', "--json"], env=env, stdout=subprocess.DEVNULL, check=True, timeout=30)
+    # A native observation can legitimately fail (for example its finite apt
+    # deadline). Keep that actual report; status must preserve the failure too.
+    report_path = home / "native-report.json"
+    with report_path.open("xb") as output:
+        result = subprocess.run([str(binary), "--config", str(policy), 'apply', "--json"],
+                                env=env, stdout=output, stderr=subprocess.DEVNULL, timeout=30)
+    if result.returncode not in (0, 1) or report_path.stat().st_size > 1_048_576:
+        raise RuntimeError("unexpected native updater completion")
+    report = json.loads(report_path.read_bytes())
+    if not report.get("results") or result.returncode != int(any(not item["ok"] for item in report["results"])):
+        raise RuntimeError("native updater exit/report mismatch")
+    env["NDS_PROVIDER_REPORT"] = str(report_path)
     def state():
         return {str(path.relative_to(home)): hashlib.sha256(path.read_bytes()).hexdigest() for path in (home / "state").rglob("*") if path.is_file()}
     before = state()
