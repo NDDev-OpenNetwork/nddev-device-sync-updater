@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "kebab-case")]
-pub enum Action {
+pub enum SystemUpdateAction {
     GdsInstall { platform: String },
     VerifiedApplications,
     AptObserve,
@@ -16,7 +16,7 @@ pub enum Action {
 pub struct Plan {
     pub schema: u8,
     pub channel: String,
-    pub actions: Vec<Action>,
+    pub actions: Vec<SystemUpdateAction>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
